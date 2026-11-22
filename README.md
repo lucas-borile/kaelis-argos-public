@@ -6,6 +6,10 @@
 
 [English](#english) · [Português](#português) · [Documentation](#documentation--documentação)
 
+![Kaelis Argos dashboard with anonymized demonstration data](docs/assets/kaelis-argos-demo.png)
+
+_Anonymized demonstration interface. All camera identifiers, metrics, and events shown above are fictional. / Interface demonstrativa anonimizada. Todos os identificadores, métricas e eventos exibidos acima são fictícios._
+
 ---
 
 ## English

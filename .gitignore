@@ -33,6 +33,7 @@ logs/
 *.avi
 !frontend/vendor/**/*.png
 !frontend/**/*.svg
+!docs/assets/*.png
 
 # Benchmark/runtime outputs
 benchmarks/results/
