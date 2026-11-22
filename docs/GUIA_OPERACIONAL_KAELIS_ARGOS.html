@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guia Operacional Kaelis Argos</title>
+  <style>
+    :root {
+      --bg: #07090d;
+      --nav: #090d12;
+      --panel: #0f141b;
+      --panel-2: #151b24;
+      --line: #26313f;
+      --line-2: #3a4656;
+      --text: #edf2f7;
+      --muted: #9aa7b6;
+      --soft: #c9d4df;
+      --brand: #9cc7ff;
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --red: #fb7185;
+      --blue: #60a5fa;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.56;
+    }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .shell {
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      border-right: 1px solid var(--line);
+      background: var(--nav);
+      overflow: auto;
+    }
+    .brand {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 24px;
+    }
+    .brand strong {
+      font-size: 18px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .nav-title {
+      margin: 18px 0 6px;
+      color: #6f8194;
+      font: 900 10px var(--mono);
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+    nav a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 7px;
+      color: #dbe6f2;
+      font-size: 13px;
+    }
+    nav a:hover {
+      background: #121923;
+      text-decoration: none;
+    }
+    main {
+      max-width: 1280px;
+      padding: 34px clamp(20px, 5vw, 64px) 84px;
+    }
+    header {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 30px;
+      padding-bottom: 26px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1 {
+      max-width: 980px;
+      margin: 0;
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 54px 0 14px;
+      padding-top: 8px;
+      font-size: 29px;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 30px 0 10px;
+      color: #fff;
+      font-size: 19px;
+    }
+    h4 {
+      margin: 20px 0 8px;
+      color: #f7fbff;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    p { margin: 0 0 12px; color: var(--soft); }
+    ul, ol { margin: 8px 0 20px; padding-left: 22px; }
+    li { margin: 6px 0; color: var(--soft); }
+    code {
+      padding: 2px 5px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #0a0f15;
+      color: #dbeafe;
+      font-family: var(--mono);
+      font-size: .92em;
+    }
+    .lead {
+      max-width: 980px;
+      color: #d7e0ea;
+      font-size: 18px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #101722;
+      color: #dbe6f2;
+      font: 800 12px var(--mono);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0 24px;
+    }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    .card p, .card li { color: #c8d3df; font-size: 14px; }
+    .note {
+      margin: 16px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--brand);
+      background: #101722;
+      color: #dbeafe;
+    }
+    .note.warn { border-left-color: var(--amber); }
+    .note.danger { border-left-color: var(--red); }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .table th, .table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    .table th {
+      background: #131a23;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .table tr:last-child td { border-bottom: 0; }
+    .screenshot {
+      margin: 18px 0 28px;
+      border: 1px solid var(--line-2);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #05070a;
+      box-shadow: 0 18px 42px rgba(0,0,0,.32);
+    }
+    .screenshot figcaption {
+      margin: 0;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #111821;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 18px 0 24px;
+    }
+    .step {
+      min-height: 118px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .step b {
+      display: block;
+      margin-bottom: 7px;
+      color: #fff;
+    }
+    .step span {
+      color: #c8d3df;
+      font-size: 13px;
+    }
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      min-height: 24px;
+      padding: 0 7px;
+      border: 1px solid var(--line-2);
+      border-radius: 5px;
+      background: #101722;
+      font: 900 12px var(--mono);
+      color: #fff;
+    }
+    .status-open { color: var(--red); font-weight: 800; }
+    .status-ok { color: var(--green); font-weight: 800; }
+    .status-warn { color: var(--amber); font-weight: 800; }
+    footer {
+      margin-top: 56px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 1100px) {
+      .shell { grid-template-columns: 1fr; }
+      nav { position: relative; height: auto; }
+      main { padding-top: 24px; }
+      .grid, .grid.two, .grid.four, .workflow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav aria-label="Sumário">
+      <div class="brand">
+        <strong>Kaelis Argos</strong>
+        <span>Guia operacional completo</span>
+      </div>
+      <div class="nav-title">Fundamentos</div>
+      <a href="#visao-geral">Visão geral</a>
+      <a href="#arquitetura">Como o sistema funciona</a>
+      <a href="#conceitos">Conceitos principais</a>
+      <a href="#acessos">Acessos e permissões</a>
+      <div class="nav-title">Telas</div>
+      <a href="#telas">Mapa e telas principais</a>
+      <a href="#ocorrencias">Ocorrências</a>
+      <a href="#fila">Fila de atenção</a>
+      <a href="#geofences">Geofences</a>
+      <a href="#cameras">Câmeras e frames</a>
+      <a href="#revisao">Revisão e treino</a>
+      <a href="#features">Features modulares</a>
+      <div class="nav-title">Operação</div>
+      <a href="#fluxos">Fluxos recomendados</a>
+      <a href="#alertas">Alertas e resposta</a>
+      <a href="#boas-praticas">Boas práticas</a>
+      <a href="#glossario">Glossário rápido</a>
+    </nav>
+
+    <main>
+      <header>
+        <div class="meta">
+          <span class="pill">Documento HTML</span>
+          <span class="pill">Screenshots reais</span>
+          <span class="pill">Atualizado em 28/06/2026</span>
+        </div>
+        <h1>Guia operacional do Kaelis Argos</h1>
+        <p class="lead">
+          Este documento explica como o Argos funciona do ponto de vista de operação, supervisão e administração.
+          Ele descreve os conceitos centrais, as telas, os fluxos de atendimento, o papel das ocorrências e o impacto
+          das features modulares que podem ser ativadas ou desativadas pelo administrador.
+        </p>
+      </header>
+
+      <section id="visao-geral">
+        <h2>Visão Geral</h2>
+        <p>
+          O Kaelis Argos é uma central de monitoramento assistida por IA. Ele recebe fontes de vídeo, captura frames,
+          executa detecção de objetos, estima posições no mapa, aplica regras de geofence, organiza itens na fila de
+          atenção e permite abrir ocorrências com timeline, evidências e relatório PDF.
+        </p>
+        <p>
+          A proposta não é substituir a equipe de segurança. O objetivo é reduzir ruído, priorizar o que precisa de
+          avaliação humana e criar registros auditáveis para ocorrências relevantes.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Para o vigilante ou operador</strong>
+            <p>Mostra rapidamente onde há algo pendente, qual câmera olhar e qual ocorrência precisa ser acompanhada.</p>
+          </div>
+          <div class="card">
+            <strong>Para a equipe de segurança</strong>
+            <p>Organiza alertas, evidências, comentários e resolução em um fluxo rastreável.</p>
+          </div>
+          <div class="card">
+            <strong>Para o administrador</strong>
+            <p>Permite controlar usuários, câmeras, regras, integrações, features e custo de processamento.</p>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <figcaption>Visão Geral real: mapa operacional, métricas, fila de atenção e ocorrências abertas.</figcaption>
+        </figure>
+      </section>
+
+      <section id="arquitetura">
+        <h2>Como o Sistema Funciona</h2>
+        <p>
+          O Argos combina backend FastAPI, banco de dados local ou PostgreSQL, frontend HTML/JavaScript, Leaflet para mapa,
+          modelos YOLO para detecção e módulos de apoio como tracking temporal, geofences, feedback humano e exportação
+          de evidências. A operação diária acontece no navegador, enquanto o backend executa captura, processamento,
+          persistência, autenticação e APIs.
+        </p>
+
+        <div class="workflow">
+          <div class="step"><b>1. Fonte</b><span>Câmera IP, stream, URL de teste ou frame histórico entra no pipeline.</span></div>
+          <div class="step"><b>2. Captura</b><span>O backend coleta imagens em intervalos definidos pela prioridade da câmera.</span></div>
+          <div class="step"><b>3. IA</b><span>YOLO detecta objetos; módulos opcionais enriquecem com cor, tracking e atributos.</span></div>
+          <div class="step"><b>4. Regras</b><span>Geofences, permanência e status da câmera geram alertas ou itens de atenção.</span></div>
+          <div class="step"><b>5. Atendimento</b><span>Operador revisa, abre ocorrência, acompanha, resolve e exporta relatório.</span></div>
+        </div>
+
+        <table class="table">
+          <thead><tr><th>Camada</th><th>Responsabilidade</th><th>Observação operacional</th></tr></thead>
+          <tbody>
+            <tr><td>Frontend</td><td>Mapa, painéis, modais, fila, viewer, revisão e administração.</td><td>É a interface usada por operador, viewer e admin.</td></tr>
+            <tr><td>Backend</td><td>APIs, autenticação, captura, processamento, banco, PDF, auditoria e WebSocket.</td><td>Deve permanecer ativo para a operação funcionar.</td></tr>
+            <tr><td>Banco</td><td>Câmeras, frames, eventos, usuários, ocorrências, geofences, auditoria e feature flags.</td><td>SQLite atende laboratório; PostgreSQL/PostGIS é melhor para produção.</td></tr>
+            <tr><td>IA</td><td>Detecção YOLO, tracking, atributos visuais e recomendações de treino.</td><td>É a parte mais sensível a CPU/GPU/NPU.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="conceitos">
+        <h2>Conceitos Principais</h2>
+        <table class="table">
+          <thead><tr><th>Conceito</th><th>O que significa</th><th>Como aparece na operação</th></tr></thead>
+          <tbody>
+            <tr><td>Detecção</td><td>Objeto identificado pela IA em um frame.</td><td>Pessoa, carro, moto, bicicleta ou outro objeto monitorado.</td></tr>
+            <tr><td>Frame</td><td>Imagem capturada de uma câmera em um momento específico.</td><td>Usado como evidência, revisão humana ou origem de ocorrência.</td></tr>
+            <tr><td>Track</td><td>Identidade temporária de um objeto ao longo de vários frames.</td><td>Permite medir permanência, deslocamento e possível objeto parado.</td></tr>
+            <tr><td>Geofence</td><td>Área desenhada no mapa com regras próprias.</td><td>Zona restrita, portão, estacionamento, perímetro ou entrada lateral.</td></tr>
+            <tr><td>Alerta</td><td>Sinal automático gerado por regra ou condição operacional.</td><td>Objeto dentro da geofence, câmera offline, permanência anormal.</td></tr>
+            <tr><td>Fila de atenção</td><td>Lista priorizada de itens que precisam de ação humana.</td><td>O operador decide abrir, acompanhar, ignorar ou resolver.</td></tr>
+            <tr><td>Ocorrência</td><td>Registro formal de atendimento com status, timeline e evidências.</td><td>Fica marcada no mapa e pode ser exportada em PDF.</td></tr>
+            <tr><td>Feature modular</td><td>Módulo que pode ser ligado/desligado pelo admin.</td><td>Reduz custo, simplifica operação ou isola problemas.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="acessos">
+        <h2>Acessos e Permissões</h2>
+        <p>
+          O Argos separa responsabilidades por perfil. Isso reduz risco operacional e evita que usuários sem atribuição
+          administrativa alterem câmeras, usuários, integrações ou features críticas.
+        </p>
+        <table class="table">
+          <thead><tr><th>Papel</th><th>Pode fazer</th><th>Uso recomendado</th></tr></thead>
+          <tbody>
+            <tr><td>Admin</td><td>Gerenciar usuários, features, câmeras, regras, integrações, auditoria, treino e configurações.</td><td>Gestor técnico, supervisor com responsabilidade sistêmica ou administrador.</td></tr>
+            <tr><td>Operator</td><td>Operar fila, abrir e resolver ocorrências, consultar eventos, revisar câmeras e criar regras quando permitido.</td><td>Vigilante patrimonial, portaria remota, central de monitoramento ou supervisor de turno.</td></tr>
+            <tr><td>Viewer</td><td>Visualizar informações permitidas, sem alterar operação crítica.</td><td>Consulta, acompanhamento externo, auditoria leve ou demonstração controlada.</td></tr>
+          </tbody>
+        </table>
+        <div class="note danger">
+          Credenciais padrão de desenvolvimento servem apenas para laboratório. Em produção, use senhas fortes,
+          variáveis de ambiente seguras, CORS restrito, HTTPS e rotação de segredos.
+        </div>
+      </section>
+
+      <section id="telas">
+        <h2>Mapa e Telas Principais</h2>
+        <p>
+          A navegação lateral separa operação e gestão. A área central mantém o mapa como referência espacial, enquanto
+          o painel direito muda conforme a seção selecionada. A barra de ações rápidas controla camadas, criação de
+          ocorrência, limpeza visual, satélite, heatmap, grid, câmeras, cones de campo de visão e geofences.
+        </p>
+
+        <h3>Visão Geral</h3>
+        <p>
+          É a tela inicial. Ela responde: quantas câmeras estão online, quantas têm problema, quantos eventos recentes
+          existem, quantos alertas estão ativos e quais itens exigem atenção agora.
+        </p>
+
+        <h3>Monitoramento</h3>
+        <p>
+          Foca no acompanhamento em tempo real. O operador usa esta tela para observar o mapa, abrir câmeras, verificar
+          logs compactos e acompanhar alertas visuais.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Monitoramento: operação ao vivo com mapa e log compacto.</figcaption>
+        </figure>
+
+        <h3>Eventos</h3>
+        <p>
+          Centraliza histórico e consulta de eventos. É útil para investigar o que aconteceu antes de uma ocorrência,
+          revisar detecções recentes e procurar padrões por câmera, objeto ou horário.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Eventos: histórico e filtros de detecções, alertas e eventos operacionais.</figcaption>
+        </figure>
+
+        <h3>Câmeras</h3>
+        <p>
+          Permite cadastrar e ajustar fontes de vídeo, posição, azimute, campo de visão, prioridade, perfil de modelo,
+          thresholds, acesso aos frames e status operacional.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Câmeras: cadastro, operação e configuração avançada de fontes de vídeo.</figcaption>
+        </figure>
+
+        <h3>Relatórios</h3>
+        <p>
+          Consolida métricas executivas da sessão, ranking de câmeras, qualidade de IA e indicadores úteis para
+          supervisão. Relatórios de ocorrência são exportados separadamente em PDF a partir do detalhe da ocorrência.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Relatórios: visão executiva de eventos, alertas e qualidade operacional.</figcaption>
+        </figure>
+      </section>
+
+      <section id="ocorrencias">
+        <h2>Ocorrências</h2>
+        <p>
+          Ocorrência é o registro formal de algo que precisa ser acompanhado. Ela pode nascer de uma observação manual,
+          de um frame, da fila de atenção, de um alerta de geofence ou de um evento detectado pela IA.
+        </p>
+        <p>
+          Na prática, a ocorrência é o ponto onde a automação entrega o caso para a decisão humana. Ela cria um marcador
+          no mapa, possui urgência, responsável, status, tempo aberto, histórico de comentários, ações e evidências.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <strong>Manual no mapa</strong>
+            <p>O operador clica no botão vermelho <span class="kbd">!</span>, escolhe um ponto do mapa e descreve a situação.</p>
+          </div>
+          <div class="card">
+            <strong>Por frame ou detecção</strong>
+            <p>Quando uma imagem específica é a evidência, a ocorrência guarda o vínculo com câmera e frame.</p>
+          </div>
+          <div class="card">
+            <strong>Por geofence</strong>
+            <p>Alertas de área restrita podem aparecer como ocorrências amarelas ou virar ocorrências acompanháveis.</p>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <figcaption>Nova ocorrência: modal in-app aberto a partir do botão vermelho e clique no mapa.</figcaption>
+        </figure>
+
+        <h3>Dados de uma ocorrência</h3>
+        <ul>
+          <li>Nome, descrição, grau de urgência e status.</li>
+          <li>Localização geográfica e marcador pulsante no mapa.</li>
+          <li>Usuário que abriu, responsável atual e usuário que resolveu.</li>
+          <li>Tempo aberta e tempo total de resolução.</li>
+          <li>Comentários, mudanças de status e ações na timeline.</li>
+          <li>Câmera próxima sugerida quando o local está coberto por câmera.</li>
+          <li>Frame sugerido quando a ocorrência foi criada a partir de evidência visual.</li>
+          <li>PDF com abertura, comentários, evidências, localização e resolução.</li>
+        </ul>
+
+        <h3>Ações no mapa</h3>
+        <ul>
+          <li><span class="status-open">Marcador vermelho pulsante</span>: ocorrência aberta e ativa.</li>
+          <li><span class="status-warn">Marcador amarelo pulsante</span>: alerta de geofence que precisa de verificação.</li>
+          <li>Ao passar o cursor, o popup deve permitir acompanhar, resolver, abrir câmera ou abrir frame quando aplicável.</li>
+          <li>Quando a ocorrência está fora da área visível, um indicador sutil aponta a direção; ao clicar, o mapa centraliza a ocorrência.</li>
+        </ul>
+
+        <h3>Quando abrir ocorrência</h3>
+        <table class="table">
+          <thead><tr><th>Situação</th><th>Abrir ocorrência?</th><th>Motivo</th></tr></thead>
+          <tbody>
+            <tr><td>Pessoa parada em local sensível</td><td>Sim, se exige acompanhamento</td><td>Permite registrar tempo, ações e evidências.</td></tr>
+            <tr><td>Câmera offline isolada</td><td>Depende</td><td>Se for câmera crítica ou recorrente, a ocorrência ajuda a cobrar resolução.</td></tr>
+            <tr><td>Objeto abandonado</td><td>Sim</td><td>Exige timeline, responsáveis, confirmação visual e possível escalonamento.</td></tr>
+            <tr><td>Alarme falso conhecido</td><td>Não necessariamente</td><td>Pode ser marcado na fila/revisão sem formalizar ocorrência.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="fila">
+        <h2>Fila de Atenção</h2>
+        <p>
+          A fila de atenção é a mesa de triagem do Argos. Ela reúne ocorrências abertas, alertas de geofence, problemas
+          de câmera e sinais temporais relevantes. A ordenação considera prioridade, severidade, idade e tipo do item.
+        </p>
+        <div class="workflow">
+          <div class="step"><b>1. Sinal</b><span>Uma câmera, regra, ocorrência ou evento temporal gera item.</span></div>
+          <div class="step"><b>2. Priorização</b><span>O sistema atribui peso operacional e coloca na fila.</span></div>
+          <div class="step"><b>3. Triagem</b><span>O operador abre, acompanha, confirma risco ou marca como ruído.</span></div>
+          <div class="step"><b>4. Atendimento</b><span>Casos reais viram ocorrência ou atualizam uma ocorrência existente.</span></div>
+          <div class="step"><b>5. Fechamento</b><span>Após resolução, o item sai da fila ou fica registrado no histórico.</span></div>
+        </div>
+        <table class="table">
+          <thead><tr><th>Item</th><th>Origem</th><th>Ação recomendada</th></tr></thead>
+          <tbody>
+            <tr><td>Câmera pausada/offline</td><td>Status de captura</td><td>Verificar fonte, rede, energia ou reativar.</td></tr>
+            <tr><td>Alerta de geofence</td><td>Regra de área</td><td>Abrir alerta, conferir câmera próxima e criar/acompanhar ocorrência.</td></tr>
+            <tr><td>Evento temporal</td><td>Tracking e permanência</td><td>Abrir frame, confirmar risco ou registrar falso positivo.</td></tr>
+            <tr><td>Ocorrência aberta</td><td>Manual, frame, geofence ou fila</td><td>Acompanhar, comentar, resolver ou exportar relatório.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="geofences">
+        <h2>Geofences</h2>
+        <p>
+          Geofence é uma área desenhada no mapa para representar uma região física importante: portaria, perímetro,
+          estacionamento, pátio, corredor, entrada lateral, área restrita ou zona de permanência proibida.
+        </p>
+        <p>
+          Uma geofence sozinha é apenas uma área. Ela vira automação quando recebe uma regra: tipo de objeto, horário,
+          permanência mínima, severidade, cooldown e comportamento esperado.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Regras e Alertas: criação de geofences, regras, severidade e alertas gerados.</figcaption>
+        </figure>
+
+        <h3>Fluxo de uma geofence</h3>
+        <ol>
+          <li>Admin ou operador desenha a área no mapa.</li>
+          <li>Define regra por objeto, horário, severidade e tempo mínimo.</li>
+          <li>Detecções entram no pipeline de checagem.</li>
+          <li>Quando a condição é cumprida, o alerta aparece na lista e no mapa.</li>
+          <li>Alertas importantes podem virar ocorrência ou ser encerrados como resolvidos/falsos.</li>
+        </ol>
+        <div class="note warn">
+          Geofence depende de boa calibração de câmera, posição, azimute, campo de visão e qualidade de detecção.
+          Se a câmera estiver mal posicionada no mapa, o alerta pode aparecer deslocado.
+        </div>
+      </section>
+
+      <section id="cameras">
+        <h2>Câmeras e Frames</h2>
+        <p>
+          A câmera é a unidade de observação do Argos. Cada câmera pode ter coordenada, azimute, campo de visão,
+          prioridade de processamento, intervalo de captura, fonte de vídeo, modelo YOLO específico e regras de acesso
+          aos frames.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <strong>Posição e azimute</strong>
+            <p>Permitem desenhar o marcador e o cone aproximado de campo de visão no mapa.</p>
+          </div>
+          <div class="card">
+            <strong>Prioridade</strong>
+            <p>Controla frequência e importância de processamento em relação às demais câmeras.</p>
+          </div>
+          <div class="card">
+            <strong>Modelo por câmera</strong>
+            <p>Permite usar modelos candidatos/fine-tunados para cenários específicos.</p>
+          </div>
+        </div>
+
+        <h3>Frames como evidência</h3>
+        <p>
+          Frames são imagens históricas capturadas pelo sistema. Eles podem ser usados para revisar detecções, criar
+          ocorrência, treinar modelo, exportar dataset ou anexar evidência em relatório. Acesso a frames pode ser
+          aberto para todos, restrito a operadores/admins, apenas admins ou usuários específicos.
+        </p>
+
+        <h3>Quando ajustar a câmera</h3>
+        <ul>
+          <li>O marcador no mapa não corresponde ao ponto real da câmera.</li>
+          <li>O cone de campo de visão aponta para direção errada.</li>
+          <li>Eventos aparecem fora da área esperada.</li>
+          <li>A câmera gera falsos positivos em excesso.</li>
+          <li>A câmera é crítica e precisa de intervalo menor ou modelo mais preciso.</li>
+        </ul>
+      </section>
+
+      <section id="revisao">
+        <h2>Revisão, Feedback e Treino</h2>
+        <p>
+          A revisão humana fecha o ciclo de melhoria da IA. O operador ou analista valida se uma detecção está correta,
+          se houve falso positivo, classe errada, alerta falso ou objeto não detectado. Esses dados podem alimentar
+          datasets e candidatos de treino.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Revisão: feedback humano, curadoria e apoio à melhoria do modelo.</figcaption>
+        </figure>
+
+        <h3>Uso recomendado</h3>
+        <ol>
+          <li>Carregar frames recentes ou relevantes.</li>
+          <li>Marcar erros de IA com categorias claras.</li>
+          <li>Adicionar observações quando houver padrão recorrente, como chuva, guarda-chuva ou iluminação ruim.</li>
+          <li>Aprovar amostras úteis para dataset.</li>
+          <li>Treinar candidato fora do fluxo operacional crítico.</li>
+          <li>Validar candidato antes de aplicar por câmera.</li>
+        </ol>
+
+        <figure class="screenshot">
+          <figcaption>Configurações: diagnóstico, calibração, dataset, treino assistido e integrações.</figcaption>
+        </figure>
+      </section>
+
+      <section id="features">
+        <h2>Features Modulares</h2>
+        <p>
+          O Feature Manager permite ativar ou desativar módulos existentes. Ele é útil para reduzir processamento,
+          simplificar a interface, isolar falhas e adaptar o Argos ao tamanho da operação.
+        </p>
+        <figure class="screenshot">
+          <figcaption>Feature Manager: módulos, custo estimado e consequência operacional.</figcaption>
+        </figure>
+        <figure class="screenshot">
+          <figcaption>Detalhe das features: cada módulo informa impacto, custo e ação administrativa.</figcaption>
+        </figure>
+
+        <table class="table">
+          <thead><tr><th>Feature</th><th>Consumo típico</th><th>Ao desativar</th><th>Ganho esperado</th></tr></thead>
+          <tbody>
+            <tr><td>Detecção de objetos</td><td>Alto em CPU/GPU; principal custo do sistema.</td><td>Não há novas detecções, eventos visuais ou alertas derivados.</td><td>Grande economia, mas perde o núcleo do Argos.</td></tr>
+            <tr><td>Tracking temporal</td><td>Médio; usa banco, memória e cálculo por objeto.</td><td>Perde permanência, objeto parado e parte da priorização inteligente.</td><td>Reduz ruído computacional em ambientes simples.</td></tr>
+            <tr><td>Geofences</td><td>Baixo a médio; depende do volume de eventos.</td><td>Sem alertas por área e sem ocorrências automáticas de zona.</td><td>Simplifica operação quando áreas não são usadas.</td></tr>
+            <tr><td>Ocorrências</td><td>Baixo; usa banco, timeline e PDF sob demanda.</td><td>Perde registro formal, acompanhamento e relatório de atendimento.</td><td>Quase nenhum ganho; normalmente deve ficar ativa.</td></tr>
+            <tr><td>Chat operacional</td><td>Baixo; banco, WebSocket e renderização.</td><td>Remove comunicação interna e menções a eventos/frames.</td><td>Interface mais simples.</td></tr>
+            <tr><td>Telegram</td><td>Baixo; rede externa apenas em envio/teste.</td><td>Alertas deixam de sair para canal externo.</td><td>Menos dependência externa.</td></tr>
+            <tr><td>Plantas indoor</td><td>Médio; overlays, zonas e cálculo de cobertura.</td><td>Sem mapa interno, cobertura ou pontos cegos indoor.</td><td>Interface mais leve se só houver câmeras externas.</td></tr>
+            <tr><td>Feedback humano</td><td>Baixo a médio; armazenamento de anotações e imagens.</td><td>Reduz capacidade de melhorar IA e gerar dataset.</td><td>Menos dados e menos telas para operações simples.</td></tr>
+            <tr><td>Treino/exportação</td><td>Alto quando treina; baixo quando ocioso.</td><td>Sem criação de datasets YOLO ou modelos candidatos.</td><td>Evita uso acidental de CPU/GPU em produção.</td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          Regra prática: desative primeiro módulos periféricos que não fazem parte da rotina, como Telegram, chat ou indoor.
+          Evite desativar detecção, ocorrências e fila de atenção se o Argos estiver em uso operacional real.
+        </div>
+      </section>
+
+      <section id="fluxos">
+        <h2>Fluxos Recomendados</h2>
+
+        <h3>Atender uma ocorrência aberta</h3>
+        <ol>
+          <li>Abrir a fila de atenção ou clicar no marcador pulsante no mapa.</li>
+          <li>Verificar urgência, tempo aberta e usuário responsável.</li>
+          <li>Clicar em <code>Acompanhar</code> para assumir o caso.</li>
+          <li>Abrir câmera próxima ou frame associado quando disponível.</li>
+          <li>Adicionar comentários objetivos na timeline.</li>
+          <li>Resolver com resumo claro do que foi feito.</li>
+          <li>Exportar PDF se houver necessidade de reporte formal.</li>
+        </ol>
+
+        <h3>Criar ocorrência manual</h3>
+        <ol>
+          <li>Clicar no botão vermelho <span class="kbd">!</span> na barra de ações rápidas.</li>
+          <li>Clicar no ponto do mapa onde a ocorrência está acontecendo.</li>
+          <li>Preencher nome, urgência e descrição.</li>
+          <li>Confirmar em <code>Abrir ocorrência</code>.</li>
+          <li>Usar o marcador pulsante para acompanhar ou resolver.</li>
+        </ol>
+
+        <h3>Tratar alerta de geofence</h3>
+        <ol>
+          <li>Abrir Regras e Alertas ou clicar no marcador amarelo no mapa.</li>
+          <li>Conferir objeto, câmera, horário e geofence disparada.</li>
+          <li>Abrir câmera próxima ou frame relacionado.</li>
+          <li>Se for risco real, abrir/acompanhar ocorrência.</li>
+          <li>Se for falso, encerrar e ajustar regra, permanência ou sensibilidade.</li>
+        </ol>
+
+        <h3>Revisar falso positivo ou erro de classe</h3>
+        <ol>
+          <li>Abrir a tela Revisão.</li>
+          <li>Selecionar evento/frame.</li>
+          <li>Marcar como correto, falso positivo, classe errada, alerta falso ou objeto não detectado.</li>
+          <li>Adicionar observação se houver padrão ambiental.</li>
+          <li>Aprovar para dataset quando a imagem for útil para treino futuro.</li>
+        </ol>
+      </section>
+
+      <section id="alertas">
+        <h2>Alertas e Resposta Operacional</h2>
+        <p>
+          Um alerta não é automaticamente uma ocorrência grave. Ele é um pedido de atenção. A resposta correta depende
+          de contexto, câmera, área, horário e histórico.
+        </p>
+        <table class="table">
+          <thead><tr><th>Tipo de alerta</th><th>Verificação inicial</th><th>Resposta sugerida</th></tr></thead>
+          <tbody>
+            <tr><td>Geofence</td><td>Área, objeto, frame, câmera e horário.</td><td>Confirmar risco, abrir ocorrência ou encerrar como falso.</td></tr>
+            <tr><td>Permanência</td><td>Tempo parado, local, comportamento e repetição.</td><td>Monitorar, abrir câmera e registrar ocorrência se houver risco.</td></tr>
+            <tr><td>Câmera offline</td><td>Criticidade, última captura e fonte de vídeo.</td><td>Acionar manutenção, trocar fonte ou abrir ocorrência técnica.</td></tr>
+            <tr><td>Volume anormal</td><td>Padrão temporal, chuva, evento público, iluminação.</td><td>Ajustar threshold, prioridade ou regra para reduzir ruído.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="boas-praticas">
+        <h2>Boas Práticas</h2>
+        <div class="grid two">
+          <div class="card">
+            <strong>Para operação diária</strong>
+            <ul>
+              <li>Comece pela fila de atenção.</li>
+              <li>Use ocorrências para casos que exigem acompanhamento real.</li>
+              <li>Não deixe ocorrências abertas sem comentário ou responsável.</li>
+              <li>Resolva alertas antigos de geofence para limpar o mapa.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Para qualidade da IA</strong>
+            <ul>
+              <li>Revise falsos positivos recorrentes.</li>
+              <li>Salve exemplos de chuva, noite, guarda-chuvas e oclusão.</li>
+              <li>Use modelos candidatos por câmera quando o cenário for muito específico.</li>
+              <li>Valide modelos antes de aplicar na operação.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Para administração</strong>
+            <ul>
+              <li>Revise permissões de usuários periodicamente.</li>
+              <li>Desative features que não são usadas.</li>
+              <li>Monitore CPU, memória, storage e latência.</li>
+              <li>Mantenha segredos fora do repositório.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Para implantação</strong>
+            <ul>
+              <li>Use HTTPS e CORS restrito.</li>
+              <li>Prefira PostgreSQL/PostGIS em produção.</li>
+              <li>Dimensione storage para frames e relatórios.</li>
+              <li>Teste carga com número real de câmeras.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="glossario">
+        <h2>Glossário Rápido</h2>
+        <div class="grid two">
+          <div class="card"><strong>Azimute</strong><p>Direção horizontal para onde a câmera aponta, em graus.</p></div>
+          <div class="card"><strong>FoV</strong><p>Campo de visão da câmera; no mapa aparece como cone.</p></div>
+          <div class="card"><strong>Cooldown</strong><p>Tempo mínimo entre alertas semelhantes para reduzir repetição.</p></div>
+          <div class="card"><strong>Severidade</strong><p>Grau operacional: baixa, média, alta ou crítica.</p></div>
+          <div class="card"><strong>Timeline</strong><p>Histórico de ações, comentários e mudanças de status da ocorrência.</p></div>
+          <div class="card"><strong>Frame associado</strong><p>Imagem vinculada a uma detecção ou ocorrência como evidência.</p></div>
+          <div class="card"><strong>Câmera próxima</strong><p>Sugestão de câmera que cobre ou está perto do ponto da ocorrência.</p></div>
+          <div class="card"><strong>Feature flag</strong><p>Chave administrativa que ativa ou desativa um módulo funcional.</p></div>
+        </div>
+      </section>
+
+      <footer>
+        Guia gerado com capturas reais do ambiente local em execução. Para atualizar as imagens, rode novamente o processo
+        de captura com Playwright e substitua os arquivos em <code>docs/assets/guia-operacional/</code>.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

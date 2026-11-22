@@ -1,0 +1,40 @@
+.venv/
+.venv312/
+__pycache__/
+*.py[cod]
+*.pt
+
+# Local env and OS metadata
+.env
+.DS_Store
+*.icloud
+
+# Local databases and SQLite sidecars
+*.db
+*.db.backup-*
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Runtime captures, processed frames and generated event media
+backend/data/
+backend/static/floor_plans/
+data/
+frames/
+events/
+logs/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.mp4
+*.mov
+*.avi
+!frontend/vendor/**/*.png
+!frontend/**/*.svg
+
+# Benchmark/runtime outputs
+benchmarks/results/
+benchmarks/reports/*.png
+*.jsonl

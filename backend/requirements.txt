@@ -1,0 +1,17 @@
+fastapi>=0.111
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic>=2.7
+python-dotenv>=1.0
+loguru>=0.7
+requests>=2.32
+numpy>=1.26,<2
+opencv-python-headless>=4.10,<4.12
+imageio-ffmpeg>=0.5
+ultralytics>=8.2
+yt-dlp>=2025.6.9
+psutil>=5.9
+matplotlib>=3.8
+tqdm>=4.66
+psycopg[binary]>=3.2
+cryptography>=42

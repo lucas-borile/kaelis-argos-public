@@ -1,0 +1,9 @@
+{
+  "models": [],
+  "policy": {
+    "production_training": "disabled",
+    "requires_manual_approval": true,
+    "requires_baseline_evaluation": true,
+    "requires_rollback_plan": true
+  }
+}

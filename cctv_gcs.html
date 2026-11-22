@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CCTV-GCS · Ambiente demonstrativo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0e14; color:#c2cad8; font-family:'Segoe UI',sans-serif; height:100vh; overflow:hidden; }
+
+#app { display:flex; flex-direction:column; height:100vh; }
+
+/* ── Top bar ── */
+#topbar {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  background:#0d1117; border-bottom:1px solid #1e2836;
+  padding:8px 16px; flex-shrink:0; z-index:1000;
+}
+#topbar .logo { font-size:13px; font-weight:700; color:#4fc3f7; letter-spacing:2px; }
+#topbar .logo span { color:#ef5350; }
+
+.stat-pill {
+  display:flex; align-items:center; gap:6px;
+  background:#111c2b; border:1px solid #1e2836;
+  border-radius:20px; padding:4px 10px; font-size:11px;
+}
+.stat-pill .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.dot-green  { background:#00e676; box-shadow:0 0 6px #00e676; }
+.dot-blue   { background:#29b6f6; box-shadow:0 0 6px #29b6f6; }
+.dot-orange { background:#ffa726; box-shadow:0 0 6px #ffa726; }
+.dot-red    { background:#ef5350; box-shadow:0 0 6px #ef5350; }
+.dot-purple { background:#ab47bc; box-shadow:0 0 6px #ab47bc; }
+
+.clock { margin-left:auto; font-size:12px; color:#4a5f73; font-family:monospace; white-space:nowrap; }
+
+/* ── Main area ── */
+#main { display:flex; flex:1; overflow:hidden; }
+#map { flex:1; position:relative; }
+
+/* ── Overlay stats (over the map) ── */
+.overlay-stats {
+  position:absolute; top:10px; left:10px; z-index:500;
+  display:flex; flex-direction:column; gap:6px; pointer-events:none;
+}
+.os-card {
+  background:rgba(13,17,23,.88); border:1px solid #1e2836;
+  border-radius:4px; padding:6px 10px; font-size:11px;
+  backdrop-filter:blur(4px);
+}
+.os-val { font-size:22px; font-weight:700; line-height:1.1; }
+.os-lbl { color:#4a5f73; font-size:9px; letter-spacing:1px; text-transform:uppercase; }
+
+/* ── Sidebar ── */
+#sidebar {
+  width:270px; background:#0d1117; border-left:1px solid #1e2836;
+  display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;
+}
+.sidebar-section { border-bottom:1px solid #1e2836; padding:12px; }
+.sidebar-section h4 {
+  font-size:10px; letter-spacing:1.5px; color:#4a5f73;
+  text-transform:uppercase; margin-bottom:8px;
+}
+
+.ctrl-row { display:flex; gap:6px; margin-bottom:6px; }
+.ctrl-btn {
+  flex:1; padding:5px 4px; font-size:10px; font-weight:600; letter-spacing:.4px;
+  background:#111c2b; border:1px solid #1e2836; border-radius:4px;
+  color:#6b7a8d; cursor:pointer; transition:all .2s; text-align:center;
+  user-select:none;
+}
+.ctrl-btn:hover  { border-color:#29b6f6; color:#29b6f6; }
+.ctrl-btn.active { background:#0d2137; border-color:#4fc3f7; color:#4fc3f7; }
+
+.zone-toggle { display:flex; gap:4px; flex-wrap:wrap; }
+.zt {
+  font-size:10px; padding:3px 8px; border-radius:3px;
+  background:#111c2b; border:1px solid #1e2836; color:#4a5f73;
+  cursor:pointer; user-select:none; transition:all .2s;
+}
+.zt.on { border-color:#4fc3f7; color:#4fc3f7; }
+
+/* ── Detection list ── */
+.detection-item {
+  display:flex; align-items:center; gap:8px;
+  padding:5px 8px; border-radius:4px; margin-bottom:4px;
+  background:#111c2b; border:1px solid #1a2533; font-size:11px;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:none; } }
+.di-icon {
+  width:24px; height:24px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+}
+.di-info { flex:1; min-width:0; }
+.di-label { font-weight:600; color:#c2cad8; font-size:11px; }
+.di-meta  { color:#4a5f73; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.di-time  { font-size:10px; color:#3d4f63; flex-shrink:0; }
+
+/* ── Heat bars ── */
+.heatbar { height:5px; background:#111c2b; border-radius:3px; overflow:hidden; margin-top:3px; }
+.heatbar-fill { height:100%; border-radius:3px; transition:width .5s; }
+.bar-row { display:flex; justify-content:space-between; font-size:10px; color:#4a5f73; margin:5px 0 2px; }
+
+/* ── Status log ── */
+#status-log {
+  flex:1; overflow-y:auto; padding:8px 12px;
+  font-size:10px; font-family:monospace; color:#3d4f63;
+}
+.log-entry { margin-bottom:3px; line-height:1.5; }
+.log-entry span      { color:#4fc3f7; }
+.log-entry.warn span { color:#ffa726; }
+.log-entry.alert span{ color:#ef5350; }
+
+/* ── Timeline ── */
+#timeline-bar {
+  background:#0d1117; border-top:1px solid #1e2836;
+  padding:8px 16px 6px; flex-shrink:0;
+}
+.tl-header {
+  display:flex; align-items:center; gap:12px; margin-bottom:5px;
+  font-size:11px; color:#6b7a8d;
+}
+.tl-header strong { color:#c2cad8; font-size:12px; }
+#tl-track {
+  position:relative; height:32px;
+  background:#111c2b; border:1px solid #1e2836; border-radius:4px;
+  cursor:pointer; overflow:hidden;
+}
+#tl-cursor {
+  position:absolute; top:0; bottom:0; width:2px;
+  background:#4fc3f7; box-shadow:0 0 8px #4fc3f7;
+  pointer-events:none; transition:left .2s;
+}
+#tl-labels {
+  display:flex; justify-content:space-between;
+  font-size:10px; color:#3d4f63; margin-top:2px;
+}
+#tl-events { position:absolute; top:0; bottom:0; left:0; right:0; }
+.tl-event {
+  position:absolute; top:3px; bottom:3px;
+  border-radius:2px; pointer-events:none;
+}
+
+/* ── Leaflet dark popup ── */
+.dark-popup .leaflet-popup-content-wrapper {
+  background:#0d1117 !important; border:1px solid #1e2836 !important;
+  color:#c2cad8 !important; box-shadow:0 4px 20px rgba(0,0,0,.6) !important;
+  border-radius:6px !important; font-family:'Segoe UI',sans-serif;
+}
+.dark-popup .leaflet-popup-tip { background:#0d1117 !important; }
+.dark-popup .leaflet-popup-content { margin:10px 14px; font-size:12px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Top bar ── -->
+  <div id="topbar">
+    <div class="logo">CCTV<span>—</span>GCS</div>
+    <div class="stat-pill"><div class="dot dot-green"></div><span id="cams-online">1600</span> câmeras</div>
+    <div class="stat-pill"><div class="dot dot-blue"></div><span id="cnt-pessoas">0</span> pessoas</div>
+    <div class="stat-pill"><div class="dot dot-orange"></div><span id="cnt-carros">0</span> carros</div>
+    <div class="stat-pill"><div class="dot dot-red"></div><span id="cnt-motos">0</span> motos</div>
+    <div class="stat-pill"><div class="dot dot-purple"></div>Scan <span id="scan-timer">5s</span></div>
+    <div class="clock" id="clock">00:00:00</div>
+  </div>
+
+  <!-- ── Main ── -->
+  <div id="main">
+
+    <!-- Map -->
+    <div id="map">
+      <div class="overlay-stats">
+        <div class="os-card">
+          <div class="os-val" style="color:#00e676" id="ov-pessoas">0</div>
+          <div class="os-lbl">Pessoas</div>
+        </div>
+        <div class="os-card">
+          <div class="os-val" style="color:#ffa726" id="ov-carros">0</div>
+          <div class="os-lbl">Carros</div>
+        </div>
+        <div class="os-card">
+          <div class="os-val" style="color:#ef5350" id="ov-motos">0</div>
+          <div class="os-lbl">Motos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+
+      <div class="sidebar-section">
+        <h4>Controles</h4>
+        <div class="ctrl-row">
+          <div class="ctrl-btn active" id="btn-cameras"    onclick="toggleLayer('cameras',this)">Câmeras</div>
+          <div class="ctrl-btn active" id="btn-detections" onclick="toggleLayer('detections',this)">Detecções</div>
+          <div class="ctrl-btn active" id="btn-range"      onclick="toggleLayer('range',this)">Alcance</div>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-btn active" id="btn-live" onclick="goLive()">● Live</div>
+          <div class="ctrl-btn" onclick="doScan()">⟳ Scan</div>
+          <div class="ctrl-btn" onclick="clearDetections()">✕ Limpar</div>
+        </div>
+        <div class="zone-toggle" id="zone-toggle" style="margin-top:4px">
+          <div class="zt on" onclick="toggleZone('pessoas',this)">🚶 Pessoas</div>
+          <div class="zt on" onclick="toggleZone('carros',this)">🚗 Carros</div>
+          <div class="zt on" onclick="toggleZone('motos',this)">🏍 Motos</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h4>Detecções recentes</h4>
+        <div id="detections-list"></div>
+        <div style="margin-top:8px">
+          <div class="bar-row"><span>Pessoas</span><span id="bar-p-val">0</span></div>
+          <div class="heatbar"><div class="heatbar-fill" id="bar-p" style="width:0%;background:#00e676"></div></div>
+          <div class="bar-row"><span>Carros</span><span id="bar-c-val">0</span></div>
+          <div class="heatbar"><div class="heatbar-fill" id="bar-c" style="width:0%;background:#ffa726"></div></div>
+          <div class="bar-row"><span>Motos</span><span id="bar-m-val">0</span></div>
+          <div class="heatbar"><div class="heatbar-fill" id="bar-m" style="width:0%;background:#ef5350"></div></div>
+        </div>
+      </div>
+
+      <div id="status-log">
+        <div class="log-entry"><span>[SYS]</span> CCTV-GCS v1.0 iniciado</div>
+        <div class="log-entry"><span>[SYS]</span> 1600 câmeras demonstrativas conectadas</div>
+        <div class="log-entry"><span>[SYS]</span> YOLO v8n engine ativo</div>
+        <div class="log-entry"><span>[SYS]</span> Aguardando primeiro scan...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Timeline ── -->
+  <div id="timeline-bar">
+    <div class="tl-header">
+      <strong>Linha do Tempo</strong>
+      <span id="tl-time-display">Ao vivo</span>
+      <span style="margin-left:auto;font-size:10px;font-weight:700" id="tl-mode-badge">● LIVE</span>
+    </div>
+    <div id="tl-track" onclick="seekTimeline(event)">
+      <div id="tl-events"></div>
+      <div id="tl-cursor" style="left:100%"></div>
+    </div>
+    <div id="tl-labels"></div>
+  </div>
+
+</div>
+<script>
+// ─────────────────────────────────────────────
+//  Config
+// ─────────────────────────────────────────────
+const DEFAULT_CENTER = [0, 0];
+const BOUNDS = { latMin:-0.09, latMax:0.09, lngMin:-0.13, lngMax:0.13 };
+const NUM_CAMERAS = 1600;
+const SCAN_INTERVAL_MS = 5000;
+
+// ─────────────────────────────────────────────
+//  Map init
+// ─────────────────────────────────────────────
+const map = L.map('map', {
+  center: DEFAULT_CENTER, zoom: 13,
+  zoomControl: false, attributionControl: false, preferCanvas: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19, subdomains: 'abcd'
+}).addTo(map);
+
+L.control.zoom({ position:'bottomright' }).addTo(map);
+L.control.attribution({ prefix:'CCTV-GCS · CartoDB · OpenStreetMap' }).addTo(map);
+
+// ─────────────────────────────────────────────
+//  Layer groups
+// ─────────────────────────────────────────────
+const layerCameras    = L.layerGroup().addTo(map);
+const layerDetections = L.layerGroup().addTo(map);
+const layerRange      = L.layerGroup().addTo(map);
+const layerState      = { cameras:true, detections:true, range:true };
+const zoneState       = { pessoas:true, carros:true, motos:true };
+
+// ─────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────
+function rand(min, max) { return min + Math.random() * (max - min); }
+
+function randInBounds() {
+  return [
+    rand(BOUNDS.latMin, BOUNDS.latMax),
+    rand(BOUNDS.lngMin, BOUNDS.lngMax)
+  ];
+}
+
+// Detection icon
+const ICONS_CFG = {
+  pessoa: { emoji:'🚶', color:'#00e676' },
+  carro:  { emoji:'🚗', color:'#ffa726' },
+  moto:   { emoji:'🏍', color:'#ef5350' }
+};
+
+function makeDetIcon(type) {
+  const ic = ICONS_CFG[type];
+  return L.divIcon({
+    html: `<div style="
+      background:${ic.color}22;border:1.5px solid ${ic.color};
+      border-radius:4px;width:22px;height:22px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;backdrop-filter:blur(2px);
+      box-shadow:0 0 8px ${ic.color}44;">${ic.emoji}</div>`,
+    className:'', iconSize:[22,22], iconAnchor:[11,11]
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Generate 1600 cameras
+// ─────────────────────────────────────────────
+const cameras = [];
+for (let i = 0; i < NUM_CAMERAS; i++) {
+  cameras.push({
+    id: i,
+    pos: randInBounds(),
+    angle: Math.random() * 360,
+    reach: rand(50, 200),   // meters
+    active: false,
+    marker: null
+  });
+}
+
+// Add circle markers (canvas, very fast at 1600 pts)
+cameras.forEach(cam => {
+  const m = L.circleMarker(cam.pos, {
+    radius:3, fillColor:'#4fc3f7', fillOpacity:.55,
+    color:'#4fc3f7', weight:.5, opacity:.35
+  });
+  m.on('click', () => showCamPopup(cam));
+  layerCameras.addLayer(m);
+  cam.marker = m;
+});
+
+// Orientation wedges — rebuild on move/zoom, skip off-screen
+function updateCamWedges() {
+  layerRange.clearLayers();
+  if (!layerState.range) return;
+  const bounds = map.getBounds();
+  cameras.forEach((cam, i) => {
+    if (i % 4 !== 0) return;           // thin out for perf
+    if (!bounds.contains(cam.pos)) return;
+    const r1 = cam.angle - 38, r2 = cam.angle + 38;
+    const latDeg = cam.reach / 111320;
+    const lngDeg = cam.reach / (111320 * Math.cos(cam.pos[0] * Math.PI/180));
+    const ptAng = a => {
+      const ar = a * Math.PI / 180;
+      return [cam.pos[0] + latDeg * Math.sin(ar), cam.pos[1] + lngDeg * Math.cos(ar)];
+    };
+    const color = cam.active ? '#4fc3f7' : '#1a3a4a';
+    L.polygon([cam.pos, ptAng(r1), ptAng(r2)], {
+      fillColor: color, fillOpacity: cam.active ? .18 : .06,
+      color: color, weight:.5, opacity: cam.active ? .45 : .15
+    }).addTo(layerRange);
+  });
+}
+map.on('moveend zoomend', updateCamWedges);
+updateCamWedges();
+
+function showCamPopup(cam) {
+  L.popup({ className:'dark-popup' })
+    .setLatLng(cam.pos)
+    .setContent(`
+      <strong>Câmera #${cam.id}</strong><br>
+      Orientação: ${Math.round(cam.angle)}°<br>
+      Alcance: ${Math.round(cam.reach)}m<br>
+      Status: ${cam.active ? '<span style="color:#00e676">● Ativa</span>' : '<span style="color:#4a5f73">○ Standby</span>'}
+    `)
+    .openOn(map);
+  addLog(`Câmera #${cam.id} · ${cam.pos[0].toFixed(4)}, ${cam.pos[1].toFixed(4)}`);
+}
+
+// ─────────────────────────────────────────────
+//  Detection simulation
+// ─────────────────────────────────────────────
+let detMarkers = [];
+let totalP = 0, totalC = 0, totalM = 0;
+
+function doScan() {
+  if (isReplay) return;
+
+  // Reset active flags
+  cameras.forEach(c => c.active = false);
+
+  // Activate a random subset
+  const numActive = 15 + Math.floor(Math.random() * 35);
+  const shuffled  = [...cameras].sort(() => Math.random() - .5).slice(0, numActive);
+  shuffled.forEach(c => c.active = true);
+
+  // Clear old detection markers
+  detMarkers.forEach(m => layerDetections.removeLayer(m));
+  detMarkers = [];
+
+  let p = 0, c = 0, mo = 0;
+  const newDets = [];
+
+  shuffled.forEach(cam => {
+    const numDets = Math.random() < .25 ? 0 : Math.floor(rand(1, 5));
+    for (let d = 0; d < numDets; d++) {
+      const type = pickType();
+      if (!zoneVisible(type)) continue;
+
+      const distFrac = rand(.15, .85);
+      const spreadDeg = (rand(-38, 38)) * Math.PI / 180;
+      const mainRad   = cam.angle * Math.PI / 180;
+      const latOff = (cam.reach * distFrac / 111320) * Math.sin(mainRad + spreadDeg);
+      const lngOff = (cam.reach * distFrac / (111320 * Math.cos(cam.pos[0]*Math.PI/180))) * Math.cos(mainRad + spreadDeg);
+
+      const detPos = [cam.pos[0] + latOff, cam.pos[1] + lngOff];
+      const conf   = rand(.72, .98);
+      const dist   = Math.round(cam.reach * distFrac);
+      const t      = new Date().toLocaleTimeString('pt-BR');
+
+      const marker = L.marker(detPos, { icon: makeDetIcon(type) });
+      marker.bindPopup(`
+        <strong>${typeLabel(type)}</strong><br>
+        Câmera #${cam.id}<br>
+        Distância: ~${dist}m<br>
+        Confiança: ${conf.toFixed(2)}<br>
+        Horário: ${t}
+      `, { className:'dark-popup' });
+      layerDetections.addLayer(marker);
+      detMarkers.push(marker);
+
+      if (type==='pessoa') p++;
+      else if (type==='carro') c++;
+      else mo++;
+
+      newDets.push({ type, camId:cam.id, lat:detPos[0], lng:detPos[1], conf, dist, time:t });
+    }
+  });
+
+  totalP = p; totalC = c; totalM = mo;
+  updateCounts(p, c, mo);
+  updateBars(p, c, mo);
+  renderDetList(newDets.slice(-6));
+  addLog(`Scan: ${p} pessoas · ${c} carros · ${mo} motos`);
+  updateCamWedges();
+
+  // Save to history
+  history.push({ time: new Date(), p, c, mo, dets: newDets });
+  if (history.length > 120) history.shift();
+  renderTimeline();
+  resetScanTimer();
+}
+
+function pickType() {
+  const r = Math.random();
+  return r < .45 ? 'pessoa' : r < .78 ? 'carro' : 'moto';
+}
+function zoneVisible(type) {
+  return (type==='pessoa'&&zoneState.pessoas) ||
+         (type==='carro' &&zoneState.carros)  ||
+         (type==='moto'  &&zoneState.motos);
+}
+function typeLabel(type) {
+  return type==='pessoa'?'🚶 Pessoa':type==='carro'?'🚗 Carro':'🏍 Moto';
+}
+
+function updateCounts(p,c,mo) {
+  ['cnt-pessoas','ov-pessoas'].forEach(id=>document.getElementById(id).textContent=p);
+  ['cnt-carros', 'ov-carros' ].forEach(id=>document.getElementById(id).textContent=c);
+  ['cnt-motos',  'ov-motos'  ].forEach(id=>document.getElementById(id).textContent=mo);
+}
+function updateBars(p,c,mo) {
+  const mx = Math.max(p,c,mo,1);
+  document.getElementById('bar-p').style.width=(p/mx*100)+'%'; document.getElementById('bar-p-val').textContent=p;
+  document.getElementById('bar-c').style.width=(c/mx*100)+'%'; document.getElementById('bar-c-val').textContent=c;
+  document.getElementById('bar-m').style.width=(mo/mx*100)+'%';document.getElementById('bar-m-val').textContent=mo;
+}
+
+function renderDetList(dets) {
+  const list = document.getElementById('detections-list');
+  list.innerHTML = '';
+  dets.forEach(d => {
+    const ic = ICONS_CFG[d.type];
+    const div = document.createElement('div');
+    div.className = 'detection-item';
+    div.innerHTML = `
+      <div class="di-icon" style="background:${ic.color}22;border:1px solid ${ic.color}44">${ic.emoji}</div>
+      <div class="di-info">
+        <div class="di-label">${typeLabel(d.type)}</div>
+        <div class="di-meta">Câm #${d.camId} · ~${d.dist}m · conf ${d.conf.toFixed(2)}</div>
+      </div>
+      <div class="di-time">${d.time}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function clearDetections() {
+  detMarkers.forEach(m => layerDetections.removeLayer(m));
+  detMarkers = [];
+  updateCounts(0,0,0); updateBars(0,0,0);
+  document.getElementById('detections-list').innerHTML = '';
+  addLog('Detecções limpas');
+}
+
+// ─────────────────────────────────────────────
+//  Timeline
+// ─────────────────────────────────────────────
+const history = [];
+let isReplay = false;
+
+function renderTimeline() {
+  const eventsEl = document.getElementById('tl-events');
+  const labelsEl = document.getElementById('tl-labels');
+  eventsEl.innerHTML = '';
+  if (history.length < 2) return;
+
+  const times  = history.map(h => h.time.getTime());
+  const minT   = times[0], maxT = times[times.length-1];
+  const span   = maxT - minT || 1;
+
+  history.forEach((h, i) => {
+    const pct = (h.time.getTime() - minT) / span;
+    const nxt = i < history.length-1 ? history[i+1].time.getTime() : maxT + 5000;
+    const w   = Math.max(((nxt - h.time.getTime()) / span * 100), .5) + '%';
+    const intense = (h.p + h.c + h.mo);
+    const color   = h.p >= h.c && h.p >= h.mo ? '#00e676' : h.c >= h.mo ? '#29b6f6' : '#ef5350';
+    const div = document.createElement('div');
+    div.className = 'tl-event';
+    div.style.cssText = `left:${pct*100}%;width:${w};background:${color};opacity:${Math.min(.15+intense/40,.7)}`;
+    div.title = `${h.time.toLocaleTimeString('pt-BR')}: ${h.p}P ${h.c}C ${h.mo}M`;
+    eventsEl.appendChild(div);
+  });
+
+  // Labels
+  labelsEl.innerHTML = '';
+  const steps = 6;
+  for (let i = 0; i <= steps; i++) {
+    const t = new Date(minT + (maxT - minT) * (i / steps));
+    const s = document.createElement('span');
+    s.textContent = t.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    labelsEl.appendChild(s);
+  }
+}
+
+function seekTimeline(e) {
+  if (history.length < 2) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const idx  = Math.round(pct * (history.length - 1));
+  const h    = history[idx];
+
+  document.getElementById('tl-cursor').style.left = (pct*100)+'%';
+  document.getElementById('tl-time-display').textContent = h.time.toLocaleTimeString('pt-BR');
+  document.getElementById('tl-mode-badge').textContent = '◷ REPLAY';
+  document.getElementById('tl-mode-badge').style.color = '#ffa726';
+
+  isReplay = true;
+  updateCounts(h.p, h.c, h.mo);
+  updateBars(h.p, h.c, h.mo);
+
+  detMarkers.forEach(m => layerDetections.removeLayer(m));
+  detMarkers = [];
+  (h.dets || []).forEach(d => {
+    const m = L.marker([d.lat, d.lng], { icon: makeDetIcon(d.type) });
+    layerDetections.addLayer(m);
+    detMarkers.push(m);
+  });
+
+  addLog(`Replay: ${h.time.toLocaleTimeString('pt-BR')} · ${h.p}P ${h.c}C ${h.mo}M`, 'warn');
+}
+
+function goLive() {
+  isReplay = false;
+  document.getElementById('tl-cursor').style.left = '100%';
+  document.getElementById('tl-time-display').textContent = 'Ao vivo';
+  document.getElementById('tl-mode-badge').textContent = '● LIVE';
+  document.getElementById('tl-mode-badge').style.color = '#4fc3f7';
+  addLog('Retornou ao modo Live');
+}
+
+// ─────────────────────────────────────────────
+//  Auto scan countdown
+// ─────────────────────────────────────────────
+let scanCountdown = 5;
+let scanTimer = null;
+
+function resetScanTimer() {
+  scanCountdown = 5;
+  document.getElementById('scan-timer').textContent = '5s';
+}
+
+setInterval(() => {
+  if (!isReplay) {
+    scanCountdown--;
+    document.getElementById('scan-timer').textContent = Math.max(scanCountdown,0)+'s';
+  }
+}, 1000);
+
+setInterval(() => { if (!isReplay) doScan(); }, SCAN_INTERVAL_MS);
+
+// ─────────────────────────────────────────────
+//  Layer toggles
+// ─────────────────────────────────────────────
+function toggleLayer(name, btn) {
+  layerState[name] = !layerState[name];
+  btn.classList.toggle('active', layerState[name]);
+  if (name === 'cameras')    layerState.cameras    ? map.addLayer(layerCameras)    : map.removeLayer(layerCameras);
+  if (name === 'detections') layerState.detections ? map.addLayer(layerDetections) : map.removeLayer(layerDetections);
+  if (name === 'range') updateCamWedges();
+}
+
+function toggleZone(name, el) {
+  zoneState[name] = !zoneState[name];
+  el.classList.toggle('on', zoneState[name]);
+}
+
+// ─────────────────────────────────────────────
+//  Status log
+// ─────────────────────────────────────────────
+function addLog(msg, type='') {
+  const log = document.getElementById('status-log');
+  const t   = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + type;
+  div.innerHTML = `<span>[${t}]</span> ${msg}`;
+  log.prepend(div);
+  while (log.children.length > 60) log.removeChild(log.lastChild);
+}
+
+// ─────────────────────────────────────────────
+//  Clock
+// ─────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─────────────────────────────────────────────
+//  Init — first scan after map ready
+// ─────────────────────────────────────────────
+setTimeout(doScan, 1000);
+</script>
+</body>
+</html>
